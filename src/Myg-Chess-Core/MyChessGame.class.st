@@ -56,6 +56,32 @@ MyChessGame >> checkForMate [
 	blackPlayer king isCheckMated ifTrue: [ self halt: 'White wins!' ].
 ]
 
+{ #category : 'as yet unclassified' }
+MyChessGame >> heatMap [
+	| legalMoves | 
+	board pieces do: [ :piece | 
+		
+		piece ifNotNil: [ 
+			legalMoves := piece legalTargetSquares. 
+		
+			legalMoves ifNotEmpty: [
+				legalMoves do: [ :square |  
+					piece isWhite ifTrue: [
+						 square border: Color red 
+						 ]
+					ifFalse: [ 
+						square border: Color blue
+						 ].
+					].	
+			]
+		 ]
+			
+	]
+
+		
+	
+]
+
 { #category : 'initialization' }
 MyChessGame >> initialize [
 
@@ -87,7 +113,7 @@ MyChessGame >> initializeFonts [
 { #category : 'initialization' }
 MyChessGame >> initializeFromFENGame: aFENGame [
 
-	| button infoPane |
+	| button infoPane buttonHeatMap |
 	aFENGame sideToMove = 'White'
 		ifTrue: [ currentPlayer := whitePlayer ]
 		ifFalse: [ currentPlayer := blackPlayer ].
@@ -99,6 +125,10 @@ MyChessGame >> initializeFromFENGame: aFENGame [
 	button := ToButton new.
 	button labelText: 'Play!'.
 	button whenClickedDo: [ self play ].
+	
+	buttonHeatMap := ToButton new.
+	buttonHeatMap labelText: 'HeatMap'. 
+	buttonHeatMap whenClickedDo: [ self heatMap ].
 	
 	infoPane := ToElement new.
 	infoPane constraintsDo: [ :c | 
@@ -116,6 +146,7 @@ MyChessGame >> initializeFromFENGame: aFENGame [
 	self addChild: infoPane.
 	infoPane addChild: movesLabel.
 	infoPane addChild: button.
+	infoPane addChild: buttonHeatMap.
 
 	self layout: BlLinearLayout horizontal.
 	self constraintsDo: [ :aLayoutConstraints |
