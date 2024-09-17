@@ -235,6 +235,12 @@ MyChessBoard >> selected: aMyChessSquare [
 	selected := aMyChessSquare
 ]
 
+{ #category : 'examples' }
+MyChessBoard >> squares [
+	
+	^ children collect: [ :square | square ]
+]
+
 { #category : 'highlighting' }
 MyChessBoard >> unhighLightTargets: squares [
 

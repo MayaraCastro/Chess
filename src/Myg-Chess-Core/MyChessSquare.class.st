@@ -8,7 +8,8 @@ Class {
 		'piece',
 		'contents',
 		'board',
-		'target'
+		'target',
+		'engagement'
 	],
 	#category : 'Myg-Chess-Core',
 	#package : 'Myg-Chess-Core'
@@ -116,6 +117,16 @@ MyChessSquare >> emptyContents [
 ]
 
 { #category : 'accessing' }
+MyChessSquare >> engagement [
+	^ engagement
+]
+
+{ #category : 'accessing' }
+MyChessSquare >> engagement: anInt [
+	engagement := anInt
+]
+
+{ #category : 'accessing' }
 MyChessSquare >> file [
 	
 	^ name second
@@ -139,6 +150,19 @@ MyChessSquare >> hasPiece [
 MyChessSquare >> highlightTarget [
 
 	self addChild: target
+]
+
+{ #category : 'accessing' }
+MyChessSquare >> increaseEngagementBy: aValue [
+	engagement isNil 
+		ifTrue: [
+			self engagement: aValue 
+		] 
+		ifFalse: [ 
+			engagement := engagement + aValue
+		].
+	
+	
 ]
 
 { #category : 'initialization' }

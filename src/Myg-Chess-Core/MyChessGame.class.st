@@ -23,7 +23,8 @@ Class {
 		'movesLabel',
 		'moveCountLabel',
 		'moves',
-		'dsp'
+		'dsp',
+		'isHeatMapOn'
 	],
 	#category : 'Myg-Chess-Core',
 	#package : 'Myg-Chess-Core'
@@ -49,6 +50,102 @@ MyChessGame class >> new [
 	self error: 'Please use one of the other constructors'
 ]
 
+{ #category : 'heatmap' }
+MyChessGame >> activateHeatMap [
+	| legalMoves colorValueEngagement | 
+	board squares do: [ :square | 
+		square color: Color white.
+		square background: Color white.
+		square contents: square contents.
+		square engagement: nil.
+		
+	].
+	
+	
+	board pieces do: [ :piece | 
+		
+		piece ifNotNil: [ 
+			legalMoves := piece legalTargetSquares. 
+			"if a piece engages a square than it adds a point to that square in favor of its respective color (+1 for white, -1 for black)"
+			legalMoves ifNotEmpty: [
+				legalMoves do: [ :square | 
+					piece isWhite ifTrue: [
+						 	square increaseEngagementBy: 1.
+						 ]
+					ifFalse: [ 
+							square increaseEngagementBy: -1.
+						 ].
+				].	
+			].
+		].		
+	].
+
+	board squares do: [ :square | 
+		square engagement isNotNil ifTrue: [ 
+			square engagement = 0 ifTrue: [ 
+				square background: (Color r: 1 g: 1 b: 0 alpha:0.5).
+			] ifFalse: [
+			
+				colorValueEngagement := (1 - ((1 / square engagement) abs)) min: 1  max: 0.3 .
+			square engagement < 0 ifTrue: [ 
+				square background: (Color r: 1 g: 0 b: 0 alpha: colorValueEngagement ) .
+			].
+	
+			square engagement > 0 ifTrue: [ 
+				square background: (Color r: 0.3 g: 0.7 b: 0.1 alpha: colorValueEngagement).
+			].
+			]. 
+		
+			
+	
+			
+		Transcript show: 'Engagement: ', (colorValueEngagement) asString; cr.
+		Transcript show: 'square Engagement: ', (square engagement) asString; cr.
+		square invalidate.
+		]
+				
+	].
+
+]
+
+{ #category : 'heatmap' }
+MyChessGame >> activateHeatMapV2 [
+	| legalMoves currentColor newRed newGreen | 
+	board squares do: [ :square | 
+		square color: Color white.
+		square background: Color white.
+		square contents: square contents.
+		
+	].
+	
+	
+	board pieces do: [ :piece | 
+		
+		piece ifNotNil: [ 
+			legalMoves := piece legalTargetSquares. 
+		
+			legalMoves ifNotEmpty: [
+				legalMoves do: [ :square | 
+					currentColor := square background isColorBackground ifTrue: [
+							square background paint color.
+						]. 
+					
+					piece isWhite ifTrue: [
+							newGreen := (currentColor green + 0.1) max: 1.
+						 	square background: (Color r: currentColor red g: newGreen b: 0 alpha:0.5).
+						 ]
+					ifFalse: [ 
+							newRed := (currentColor red + 0.1) max: 1.
+						 	square background: (Color r: newRed g: currentColor green b: 0 alpha:0.5).
+						 ].
+					
+					].	
+			]
+		 ]
+			
+	]
+]
+
 { #category : 'playing' }
 MyChessGame >> checkForMate [
 
@@ -56,27 +153,46 @@ MyChessGame >> checkForMate [
 	blackPlayer king isCheckMated ifTrue: [ self halt: 'White wins!' ].
 ]
 
-{ #category : 'as yet unclassified' }
-MyChessGame >> heatMap [
-	| legalMoves | 
-	board pieces do: [ :piece | 
+{ #category : 'heatmap' }
+MyChessGame >> deactivateHeatMap [
+
+	board squares do: [ :square | 
+		square color: Color white.
+		square background: Color white.
+		square contents: square contents.
 		
-		piece ifNotNil: [ 
-			legalMoves := piece legalTargetSquares. 
-		
-			legalMoves ifNotEmpty: [
-				legalMoves do: [ :square |  
-					piece isWhite ifTrue: [
-						 square border: Color red 
-						 ]
-					ifFalse: [ 
-						square border: Color blue
-						 ].
-					].	
-			]
+	].
+	
+]
+
+{ #category : 'heatmap' }
+MyChessGame >> disableEnableHeatMap [
+	
+	self isHeatMapOn: isHeatMapOn not . 
+	
+	self isHeatMapOn 
+		ifTrue: [ 
+			self activateHeatMap .
 		 ]
-			
-	]
+	 	ifFalse: [ 
+			self deactivateHeatMap .
+		 ].
+	
+	
+
+		
+	
+]
+
+{ #category : 'heatmap' }
+MyChessGame >> heatMap [
+
+	self isHeatMapOn 
+		ifTrue: [ 
+			self activateHeatMap .
+		 ]
+	
+	
 
 		
 	
@@ -90,7 +206,8 @@ MyChessGame >> initialize [
 
 	moves := OrderedCollection new.
 	whitePlayer := MyPlayer new white game: self.
-	blackPlayer := MyPlayer new black game: self
+	blackPlayer := MyPlayer new black game: self.
+	self isHeatMapOn: false.
 ]
 
 { #category : 'initialization' }
@@ -128,7 +245,7 @@ MyChessGame >> initializeFromFENGame: aFENGame [
 	
 	buttonHeatMap := ToButton new.
 	buttonHeatMap labelText: 'HeatMap'. 
-	buttonHeatMap whenClickedDo: [ self heatMap ].
+	buttonHeatMap whenClickedDo: [ self disableEnableHeatMap ].
 	
 	infoPane := ToElement new.
 	infoPane constraintsDo: [ :c | 
@@ -154,11 +271,25 @@ MyChessGame >> initializeFromFENGame: aFENGame [
 		aLayoutConstraints vertical fitContent ]
 ]
 
+{ #category : 'accessing' }
+MyChessGame >> isHeatMapOn [
+
+	^ isHeatMapOn
+]
+
+{ #category : 'accessing' }
+MyChessGame >> isHeatMapOn: isActivated [
+
+	isHeatMapOn := isActivated
+]
+
 { #category : 'public' }
 MyChessGame >> move: piece to: square [
 
 	piece moveTo: square.
-	self recordMovementOf: piece to: square
+	self recordMovementOf: piece to: square.
+	self heatMap .
+
 ]
 
 { #category : 'accessing' }
@@ -171,6 +302,7 @@ MyChessGame >> pieces [
 MyChessGame >> play [
 
 	currentPlayer play.
+	self heatMap .
 	currentPlayer = whitePlayer
 		ifTrue: [ currentPlayer := blackPlayer ]
 		ifFalse: [ 

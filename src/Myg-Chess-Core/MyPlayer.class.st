@@ -71,14 +71,13 @@ MyPlayer >> play [
 		piece := pieces atRandom.
 		pieces remove: piece.
 		legalMoves := piece legalTargetSquares.
-
-		legalMoves do: [ :square |  square select.].
  
-		
 		legalMoves ifNotEmpty: [
 			game move: piece to: legalMoves atRandom.
 			^ self ] ].
-
+	
+	
+	
 	self halt: 'NO MOVES AVAILABLE!'
 ]
 
