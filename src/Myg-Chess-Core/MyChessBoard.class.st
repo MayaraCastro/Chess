@@ -67,6 +67,35 @@ MyChessBoard >> blackColor: anObject [
 	blackColor := anObject
 ]
 
+{ #category : 'accessing' }
+MyChessBoard >> calculateInfluence [
+		| legalMoves | 
+		self pieces do: [ :piece | 
+		
+		piece ifNotNil: [ 
+			legalMoves := piece legalTargetSquares. 
+			"if a piece engages a square than it adds a point to that square in favor of its respective color (+1 for white, -1 for black)"
+			legalMoves ifNotEmpty: [
+				piece isWhite ifTrue: [
+						 	piece square increaseEngagementBy: 1.
+						 ]
+					ifFalse: [ 
+							piece square increaseEngagementBy: -1.
+						 ].
+				
+				legalMoves do: [ :square | 
+					piece isWhite ifTrue: [
+						 	square increaseEngagementBy: 2.
+						 ]
+					ifFalse: [ 
+							square increaseEngagementBy: -2.
+						 ].
+				].	
+			].
+		].		
+	].
+]
+
 { #category : 'event handling' }
 MyChessBoard >> click: aMyChessSquare [ 
 	
@@ -218,9 +247,66 @@ MyChessBoard >> initializeSquares [
 ]
 
 { #category : 'accessing' }
+MyChessBoard >> paintHeatMap [
+	| colorValueEngagement |
+		self squares do: [ :square | 
+			square color: Color white.
+			square background: Color white.
+			square contents: square contents.
+			square engagement: nil.
+		].
+	
+		self calculateInfluence.
+		self squares do: [ :square | 
+		square engagement ifNotNil: [ 
+			square engagement = 0 ifTrue: [ 
+				square background: (Color r: 1 g: 1 b: 0 alpha:0.5).
+			] ifFalse: [
+			
+				colorValueEngagement := (1 - ((1 / square engagement) abs)) min: 1  max: 0.4 .
+			square engagement < 0 ifTrue: [ 
+				square background: (Color r: 1 g: 0 b: 0 alpha: colorValueEngagement ) .
+			].
+	
+			square engagement > 0 ifTrue: [ 
+				square background: (Color r: 0 g: 0.7 b: 0 alpha: colorValueEngagement).
+			].
+			]. 
+		
+		"Transcript show: 'Engagement: ', (colorValueEngagement) asString; cr.
+		Transcript show: 'square Engagement: ', (square engagement) asString; cr."
+				square invalidate.
+		].
+	].
+]
+
+{ #category : 'accessing' }
 MyChessBoard >> pieces [
 	
 	^ children collect: [ :square | square contents ]
+]
+
+{ #category : 'accessing' }
+MyChessBoard >> reinitializeBoardColors [
+	| black i | 
+	black := true.
+	i := 1.
+	self squares do: [ :square | 
+		black 
+			ifTrue: [ 
+				square color: Color white.
+				square background: Color white.
+			 ] 
+			ifFalse: [ 
+				square color: Color black.
+				square background: Color white.
+			 ].
+		
+			(i%8)=0 ifFalse: [ black := black not. ].
+			i := i +1.
+			
+			square contents: square contents.
+	].
 ]
 
 { #category : 'accessing' }

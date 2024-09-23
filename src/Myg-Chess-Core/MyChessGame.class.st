@@ -52,98 +52,10 @@ MyChessGame class >> new [
 
 { #category : 'heatmap' }
 MyChessGame >> activateHeatMap [
-	| legalMoves colorValueEngagement | 
-	board squares do: [ :square | 
-		square color: Color white.
-		square background: Color white.
-		square contents: square contents.
-		square engagement: nil.
-		
-	].
 	
-	
-	board pieces do: [ :piece | 
-		
-		piece ifNotNil: [ 
-			legalMoves := piece legalTargetSquares. 
-			"if a piece engages a square than it adds a point to that square in favor of its respective color (+1 for white, -1 for black)"
-			legalMoves ifNotEmpty: [
-				legalMoves do: [ :square | 
-					piece isWhite ifTrue: [
-						 	square increaseEngagementBy: 1.
-						 ]
-					ifFalse: [ 
-							square increaseEngagementBy: -1.
-						 ].
-				].	
-			].
-		].		
-	].
+	self isHeatMapOn: true . 
+	board paintHeatMap.
 
-	board squares do: [ :square | 
-		square engagement isNotNil ifTrue: [ 
-			square engagement = 0 ifTrue: [ 
-				square background: (Color r: 1 g: 1 b: 0 alpha:0.5).
-			] ifFalse: [
-			
-				colorValueEngagement := (1 - ((1 / square engagement) abs)) min: 1  max: 0.3 .
-			square engagement < 0 ifTrue: [ 
-				square background: (Color r: 1 g: 0 b: 0 alpha: colorValueEngagement ) .
-			].
-	
-			square engagement > 0 ifTrue: [ 
-				square background: (Color r: 0.3 g: 0.7 b: 0.1 alpha: colorValueEngagement).
-			].
-			]. 
-		
-			
-	
-			
-		Transcript show: 'Engagement: ', (colorValueEngagement) asString; cr.
-		Transcript show: 'square Engagement: ', (square engagement) asString; cr.
-		square invalidate.
-		]
-				
-	].
-
-]
-
-{ #category : 'heatmap' }
-MyChessGame >> activateHeatMapV2 [
-	| legalMoves currentColor newRed newGreen | 
-	board squares do: [ :square | 
-		square color: Color white.
-		square background: Color white.
-		square contents: square contents.
-		
-	].
-	
-	
-	board pieces do: [ :piece | 
-		
-		piece ifNotNil: [ 
-			legalMoves := piece legalTargetSquares. 
-		
-			legalMoves ifNotEmpty: [
-				legalMoves do: [ :square | 
-					currentColor := square background isColorBackground ifTrue: [
-							square background paint color.
-						]. 
-					
-					piece isWhite ifTrue: [
-							newGreen := (currentColor green + 0.1) max: 1.
-						 	square background: (Color r: currentColor red g: newGreen b: 0 alpha:0.5).
-						 ]
-					ifFalse: [ 
-							newRed := (currentColor red + 0.1) max: 1.
-						 	square background: (Color r: newRed g: currentColor green b: 0 alpha:0.5).
-						 ].
-					
-					].	
-			]
-		 ]
-			
-	]
 ]
 
 { #category : 'playing' }
@@ -156,21 +68,14 @@ MyChessGame >> checkForMate [
 { #category : 'heatmap' }
 MyChessGame >> deactivateHeatMap [
 
-	board squares do: [ :square | 
-		square color: Color white.
-		square background: Color white.
-		square contents: square contents.
-		
-	].
-	
+	self isHeatMapOn: false . 
+	board reinitializeBoardColors.
 ]
 
 { #category : 'heatmap' }
 MyChessGame >> disableEnableHeatMap [
 	
-	self isHeatMapOn: isHeatMapOn not . 
-	
-	self isHeatMapOn 
+	self isHeatMapOn not
 		ifTrue: [ 
 			self activateHeatMap .
 		 ]
@@ -189,7 +94,7 @@ MyChessGame >> heatMap [
 
 	self isHeatMapOn 
 		ifTrue: [ 
-			self activateHeatMap .
+			board paintHeatMap .
 		 ]
 	
 	
