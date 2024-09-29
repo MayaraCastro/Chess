@@ -47,6 +47,27 @@ HeatMapTests >> testCalculateInfluenceForBlackPiece [
 ]
 
 { #category : 'tests' }
+HeatMapTests >> testCalculateInfluenceForPiecesWithNoLegalMoves [
+
+	| squares board |
+	board := MyChessBoard empty.
+	board at: 'e1' put: MyPawn black .
+	
+	board calculateInfluence.
+
+	squares := board squares.
+	squares do: [ :square |  
+		
+		square ifNotNil: [ 
+			"assert the expected influence on the squares"
+			self assert: square engagement isNil.
+		].
+	].
+
+
+]
+
+{ #category : 'tests' }
 HeatMapTests >> testCalculateInfluenceForWhitePiece [
 
 	| squares board |

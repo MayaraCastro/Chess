@@ -69,31 +69,30 @@ MyChessBoard >> blackColor: anObject [
 
 { #category : 'accessing' }
 MyChessBoard >> calculateInfluence [
-		| legalMoves | 
+		| legalMoves colorMultiplier | 
+		"Reset engagement"
+		self squares do: [ :square | 
+			square engagement: nil.
+		].
+	
 		self pieces do: [ :piece | 
-		
-		piece ifNotNil: [ 
-			legalMoves := piece legalTargetSquares. 
-			"if a piece engages a square than it adds a point to that square in favor of its respective color (+1 for white, -1 for black)"
-			legalMoves ifNotEmpty: [
-				piece isWhite ifTrue: [
-						 	piece square increaseEngagementBy: 1.
-						 ]
-					ifFalse: [ 
-							piece square increaseEngagementBy: -1.
-						 ].
-				
-				legalMoves do: [ :square | 
-					piece isWhite ifTrue: [
-						 	square increaseEngagementBy: 2.
-						 ]
-					ifFalse: [ 
-							square increaseEngagementBy: -2.
-						 ].
-				].	
-			].
-		].		
-	].
+			piece ifNotNil: [ 
+				legalMoves := piece legalTargetSquares. 
+				"if a piece engages a square than it adds a point to that square in favor of its respective color (+1 for white, -1 for black)"
+          	colorMultiplier := piece isWhite ifTrue: [ 1 ] ifFalse: [ -1 ].
+            
+          	"If a piece has legal moves, increase engagement for its square and target squares"
+          	legalMoves ifNotEmpty: [
+          		"The square the piece is on"
+          		piece square increaseEngagementBy: colorMultiplier.
+                
+          		"Each legal target square"
+           		legalMoves do: [ :targetSquare |
+          			targetSquare increaseEngagementBy: (colorMultiplier * 2).
+          		].
+      			].
+			].		
+		].
 ]
 
 { #category : 'event handling' }
@@ -249,34 +248,26 @@ MyChessBoard >> initializeSquares [
 { #category : 'accessing' }
 MyChessBoard >> paintHeatMap [
 	| colorValueEngagement |
-		self squares do: [ :square | 
-			square color: Color white.
-			square background: Color white.
-			square contents: square contents.
-			square engagement: nil.
-		].
 	
-		self calculateInfluence.
-		self squares do: [ :square | 
+	self calculateInfluence.
+	
+	self squares do: [ :square | 
+		square color: Color white.
 		square engagement ifNotNil: [ 
 			square engagement = 0 ifTrue: [ 
 				square background: (Color r: 1 g: 1 b: 0 alpha:0.5).
 			] ifFalse: [
-			
 				colorValueEngagement := (1 - ((1 / square engagement) abs)) min: 1  max: 0.4 .
-			square engagement < 0 ifTrue: [ 
-				square background: (Color r: 1 g: 0 b: 0 alpha: colorValueEngagement ) .
-			].
-	
-			square engagement > 0 ifTrue: [ 
-				square background: (Color r: 0 g: 0.7 b: 0 alpha: colorValueEngagement).
-			].
+				square engagement < 0 ifTrue: [ 
+					square background: (Color r: 1 g: 0 b: 0 alpha: colorValueEngagement ) .
+				] ifFalse: [ 
+					square background: (Color r: 0 g: 0.7 b: 0 alpha: colorValueEngagement).
+				].
 			]. 
-		
-		"Transcript show: 'Engagement: ', (colorValueEngagement) asString; cr.
-		Transcript show: 'square Engagement: ', (square engagement) asString; cr."
-				square invalidate.
+		] ifNil: [ 
+			square background: Color white.
 		].
+		square contents: square contents.
 	].
 ]
 
