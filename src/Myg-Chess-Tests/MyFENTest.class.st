@@ -6,6 +6,46 @@ Class {
 }
 
 { #category : 'tests' }
+MyFENTest >> testInitialize [
+        | parser piecesDictionary |
+        MTRandomMutantSelectionStrategy.
+        parser := MyFENParser forString: ''.
+        piecesDictionary := parser pieces.
+
+			self assert: (piecesDictionary class = Dictionary). 
+        
+        self assert: (piecesDictionary at: $P) equals: 'White pawn'.
+        self assert: (piecesDictionary at: $N) equals: 'White knight'.
+        self assert: (piecesDictionary at: $B) equals: 'White bishop'.
+        self assert: (piecesDictionary at: $R) equals: 'White rook'.
+        self assert: (piecesDictionary at: $Q) equals: 'White queen'.
+        self assert: (piecesDictionary at: $K) equals: 'White king'.
+
+        self assert: (piecesDictionary at: $p) equals: 'Black pawn'.
+        self assert: (piecesDictionary at: $n) equals: 'Black knight'.
+        self assert: (piecesDictionary at: $b) equals: 'Black bishop'.
+        self assert: (piecesDictionary at: $r) equals: 'Black rook'.
+        self assert: (piecesDictionary at: $q) equals: 'Black queen'.
+        self assert: (piecesDictionary at: $k) equals: 'Black king'.
+]
+
+{ #category : 'tests' }
+MyFENTest >> testParse [
+
+	| parser game |
+
+        parser := MyFENParser forString: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'.
+
+        game := parser parse.
+
+        self assert: game notNil.
+        self assert: game board notNil.
+        self assert: (game sideToMove = 'White').
+
+        self assert: (game moveCount = 1).
+]
+
+{ #category : 'tests' }
 MyFENTest >> testParseBlackPawn [
 
 	| parser piece |

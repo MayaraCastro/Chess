@@ -11,6 +11,10 @@ Class {
 		'stream',
 		'pieces'
 	],
+	#classInstVars : [
+		'stream',
+		'pieces'
+	],
 	#category : 'Myg-Chess-Importers',
 	#package : 'Myg-Chess-Importers'
 }
@@ -175,6 +179,11 @@ MyFENParser >> parseSquare [
 MyFENParser >> peek [
 
 	^ stream peek
+]
+
+{ #category : 'accessing' }
+MyFENParser >> pieces [ 
+	^ pieces
 ]
 
 { #category : 'accessing' }
