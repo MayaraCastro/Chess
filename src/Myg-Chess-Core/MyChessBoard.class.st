@@ -286,12 +286,11 @@ MyChessBoard >> reinitializeBoardColors [
 		black 
 			ifTrue: [ 
 				square color: Color white.
-				square background: Color white.
 			 ] 
 			ifFalse: [ 
 				square color: Color black.
-				square background: Color white.
 			 ].
+		square background: Color white.
 		
 			(i%8)=0 ifFalse: [ black := black not. ].
 			i := i +1.
