@@ -42,7 +42,7 @@ MyKing >> isCheckMated [
 		                     e attackingSquares ].
 
 	^ self legalTargetSquares isEmpty and: [
-		  threatenedSquares includes: self square ]
+		threatenedSquares includes: self square ]
 ]
 
 { #category : 'testing' }

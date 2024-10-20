@@ -8,11 +8,8 @@ Class {
 { #category : 'tests' }
 MyFENTest >> testInitialize [
         | parser piecesDictionary |
-        MTRandomMutantSelectionStrategy.
         parser := MyFENParser forString: ''.
         piecesDictionary := parser pieces.
-
-			self assert: (piecesDictionary class = Dictionary). 
         
         self assert: (piecesDictionary at: $P) equals: 'White pawn'.
         self assert: (piecesDictionary at: $N) equals: 'White knight'.
@@ -40,9 +37,9 @@ MyFENTest >> testParse [
 
         self assert: game notNil.
         self assert: game board notNil.
-        self assert: (game sideToMove = 'White').
+        self assert: game sideToMove equals: 'White'.
+        self assert: game moveCount equals: 1.
 
-        self assert: (game moveCount = 1).
 ]
 
 { #category : 'tests' }

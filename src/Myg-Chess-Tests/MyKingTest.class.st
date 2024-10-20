@@ -59,10 +59,29 @@ MyKingTest >> testIsCheckMatedWithLegalMovesAndThreat [
 	board := MyChessBoard empty.
 	board at: 'a4' put: (king := MyKing white).
 
-	"blocking 5 row and b column"
-	board at: 'b5' put: MyRook black.
-	"blocking 3 row and b column"
-	board at: 'b3' put: MyRook black.
+	"opponent threatening the king"
+	board at: 'a5' put: MyRook black.
+	
+	self assert: king isCheckMated equals: false.
+			
+
+
+]
+
+{ #category : 'tests' }
+MyKingTest >> testIsCheckMatedWithoutLegalMovesAndNoThreat [
+
+	| king board |
+	board := MyChessBoard empty.
+	board at: 'a4' put: (king := MyKing white).
+
+	"place friendly pieces around the king to prevent it from moving"
+	board at: 'a3' put: MyPawn white. 
+	board at: 'b3' put: MyPawn white. 
+	board at: 'b4' put: MyPawn white. 
+	board at: 'a5' put: MyPawn white. 
+	board at: 'b5' put: MyRook white.
+
 	
 	self assert: king isCheckMated equals: false.
 			
