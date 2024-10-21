@@ -5,7 +5,7 @@ Student: Mayara SIMOES DE OLIVEIRA CASTRO
 
 The chosen kata was the `Positional Heatmap`, the goal is to show, through colors, the influence of each team's pieces in the board. 
 
-
+To run the game:
 ```
 board := MyChessGame freshGame.
 board size: 800@600.
@@ -35,7 +35,11 @@ Below are the functionalities and corresponding manual tests.
 ![alt text](imgs/image-hm-act-test1.png)
 This test verifies that the default state of the heatmap is correctly initialized to off when starting a fresh game. Since the heatmap is an optional feature, it is important that it starts in a deactivated state unless explicitly turned on. This test ensures that the system doesn’t unexpectedly activate the heatmap, which could otherwise result in unnecessary calculations or performance issues right at the beginning of the game.
 
-#### Test Explanation: 
+#### Test that were not implemented:
+- testActivateHeatMap
+- testDeactivateHeatMap 
+These two tests need to test if the methods to paint the heatmap and to reinitialize the board were called, respectively. This would need to create a mock and spy the methods, I haven't found a way to do this easily in pharo. 
+
 
 ### Piece influence
 #### Test Explanation: testCalculateInfluenceForWhitePiece
@@ -199,3 +203,37 @@ The purpose of the testReinitializeBoardColorsContentsPreservation test is to ve
     - Speed and performance of rendering the heatmap are not directly tested here. The primary goal of the existing tests is to ensure that the heatmap accurately reflects the engagement levels of pieces on the chessboard. Speed and performance are secondary concerns when validating the correctness of functionality.
 - Visual verification of Correct Colors: 
     - It was tested that the background color attribute of the squares are changed, but it is not automatically tested if in fact visually it is changed. This would probably require another tool/technique for testing and have a higher complexity.
+
+# Implementation of the kata
+To implement this kata, the main goal was to add a feature that calculates the influence each player exerts on every square of the chessboard. This influence is visually represented using a heatmap to help players understand the control dynamics of the board in real time.
+
+Influence Calculation:
+
+The influence is calculated by evaluating the legal moves of each piece on the board. Each piece has pre-existing methods that provide the list of legal target squares it can move to. For every square on the board, an engagement value is now computed:
+
+-	Positive engagement: Indicates white’s influence on the square.
+-	Negative engagement: Indicates black’s influence on the square.
+-	Zero engagement: Means the square is neutral or equally controlled by both players.
+
+The engagement value reflects how much control each player has over a square. 
+
+**Heatmap Visualization:**
+
+Based on the calculated engagement value, the background color of each square changes:
+-	Red: Indicates stronger black control.
+-	Green: Indicates stronger white control.
+-	Yellow: Indicates neutral control.
+
+The strength of the color depends on the absolute engagement value:
+
+-	The higher the engagement value, the stronger the color. For example, a square heavily controlled by white would be a bright green.
+-	The lower the engagement value (i.e., black has more control), the stronger the red shading.
+-	If the engagement value is close to zero, the square turns yellow, indicating neutral influence.
+
+Interactive Heatmap:
+
+A button has been added to toggle the heatmap feature on or off. When the heatmap is enabled, the influence for each square is recalculated after every move. This ensures that the heatmap stays up-to-date, dynamically reflecting changes in board control as the game progresses.
+
+This feature provides players with an additional tool to visually assess the influence each player has over the board, enhancing strategic planning during gameplay.
+
+![alt text](imgs/image-heatmap.png)

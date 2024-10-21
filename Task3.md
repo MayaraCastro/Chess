@@ -101,6 +101,18 @@ This FEN causes an error in the testing parser but is accepted by the API-parser
 **Expected Behavior**: The parser should correctly interpret '-' as no castling available.
 **Potential Fix**: Modify the castling rights handling logic to accept '-' as valid input alongside K, Q, k, and q.
 
+### Test:
+``` 
+testAcceptNoCastling
+
+	| parser |
+
+        parser := MyFENParser forString: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1'.
+
+        [parser parse] on: Error do: [ :ex | self fail: 'Unexpected error: ', ex messageText ].
+
+```
+
 ## Invalid Handling of Mixed Pieces and Empty Squares:
 **Bug**: The parser fails to handle ranks with mixed pieces and empty squares represented by numbers correctly. For example, it does not recognize the FEN string 1r1kq3 and instead expects something like 111 to represent three empty squares.
 
@@ -110,6 +122,17 @@ MyFENParser parse: '1r1k4/8/2P5/8/1p6/8/2K5/8 w KQkq - 0 1'.
 ````
 - **Expected Behavior**: The parser should correctly handle ranks that mix pieces and numbers (e.g., 1r1k4).
 - **Potential Fix**: Update the parser logic to properly interpret numbers in ranks as compressed representations of consecutive empty squares, instead of expecting a sequence of 1s.
+
+### Test:
+```
+testAcceptMultipleEmptySquares
+
+	| parser |
+
+        parser := MyFENParser forString: '1r1k4/8/2P5/8/1p6/8/2K5/8 w KQkq - 0 1'.
+
+        [parser parse] on: Error do: [ :ex | self fail: 'Unexpected error: ', ex messageText ].
+```
 
 ## En Passant Parsing Issue:
 **Bug**: The parser does not correctly handle en passant target squares, causing issues when an en passant square like e3 is included in the FEN string.
@@ -121,6 +144,17 @@ MyFENParser parse: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3 0 1'.
 - **Expected Behavior**: The parser should accept valid en passant target squares (e.g., e3 or -).
 
 - **Potential Fix**: Ensure the en passant square parsing logic supports all valid en passant target squares, including file a through h and rank 1 through 8, as well as the '-' symbol when there is no en passant target.
+
+### Test:
+```
+testParseEnpassantAcceptPosition
+
+	| parser |
+
+        parser := MyFENParser forString: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3 0 1'.
+
+        [parser parse] on: Error do: [ :ex | self fail: 'Unexpected error: ', ex messageText ].
+```
 
 
 ## Negative Halfmove Clock and Full Move Number is Accepted
@@ -134,3 +168,27 @@ MyFENParser parse: '1qqqkbn1/ppppppp1/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - -2 -1'
 
 - **Expected Behavior**: The parser should reject FEN strings where the halfmove clock or full move number are negative.
 
+### Tests:
+```
+testParseNotAcceptNegativeHalfMove
+
+	| parser |
+
+        parser := MyFENParser forString: '1qqqkbn1/ppppppp1/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - -1 0'.
+
+        [parser parse] on: Error do: [ :ex | ^self assert: true. ].
+
+		self fail: 'Expected an error but none was raised'.
+```
+
+```
+testParseNotAcceptNegativeFullMove
+
+	| parser |
+
+        parser := MyFENParser forString: '1qqqkbn1/ppppppp1/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 -1'.
+
+        [parser parse] on: Error do: [ :ex | ^self assert: true. ].
+
+		self fail: 'Expected an error but none was raised'.
+```
